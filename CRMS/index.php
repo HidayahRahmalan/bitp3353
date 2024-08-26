@@ -136,7 +136,7 @@
 	<footer class="page-footer font-small special-color-dark pt-4">
 		<!-- Copyright -->
 		<div class="footer-copyright text-center py-3" style="color:white;">© <?php echo date("Y"); ?>
-		 Developed By Salihah Husna
+		 Developed By Salihah Husna BITD
 		</div>
 		<!-- Copyright -->
 
