@@ -16,37 +16,46 @@ if (isset($_POST['submit'])) {
     // Encrypt the password
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    // Attempt to execute the query
-    try {
-        $qry = "INSERT INTO `user` (name, phone_num, address, email, username, password) VALUES ('$name', '$phone_num', '$address', '$email', '$username', '$hashed_password')";
-        $result = mysqli_query($con, $qry); // Execute the query
+    // Check if the username already exists
+    $check_query = "SELECT * FROM `user` WHERE username = '$username'";
+    $check_result = mysqli_query($con, $check_query);
 
-        if (!$result) {
-            throw new Exception(mysqli_error($con));
-        }
+    if (mysqli_num_rows($check_result) > 0) {
+        // Username already exists
+        $error_message = 'Username already taken. Please choose a different username.';
+        $error = true;
+    } else {
+        // Attempt to execute the query
+        try {
+            $qry = "INSERT INTO `user` (name, phone_num, address, email, username, password) VALUES ('$name', '$phone_num', '$address', '$email', '$username', '$hashed_password')";
+            $result = mysqli_query($con, $qry); // Execute the query
 
-        // Successful submission
-        $submitted = true;
-    } catch (mysqli_sql_exception $e) {
-        // Check if the error message indicates the phone number already exists
-        $sql_error = $e->getMessage();
+            if (!$result) {
+                throw new Exception(mysqli_error($con));
+            }
 
-        if (strpos($sql_error, 'Phone number already registered') !== false) {
-            // Phone number already exists error handling
-            echo "<script>alert('Phone number already registered. Please use a different phone number.');</script>";
-        } else {
-            // Other database error handling
-            $error_message = $sql_error;
+            // Successful submission
+            $submitted = true;
+        } catch (mysqli_sql_exception $e) {
+            // Check if the error message indicates the phone number already exists
+            $sql_error = $e->getMessage();
+
+            if (strpos($sql_error, 'Phone number already registered') !== false) {
+                // Phone number already exists error handling
+                echo "<script>alert('Phone number already registered. Please use a different phone number.');</script>";
+            } else {
+                // Other database error handling
+                $error_message = $sql_error;
+                $error = true;
+            }
+        } catch (Exception $e) {
+            // Other generic exception handling
+            $error_message = $e->getMessage();
             $error = true;
         }
-    } catch (Exception $e) {
-        // Other generic exception handling
-        $error_message = $e->getMessage();
-        $error = true;
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -146,9 +155,8 @@ if (isset($_POST['submit'])) {
             </form>
         </div>
         <div class="links d-flex justify-content-center">
-    <a href="userlogin.php" class="btn btn-primary" style="background-color: #c0392b; border-color: #c0392b;">Back to Login Page</a>
-</div>
-
+            <a href="userlogin.php" class="btn btn-primary" style="background-color: #c0392b; border-color: #c0392b;">Back to Login Page</a>
+        </div>
     </div>
 </div>
 
