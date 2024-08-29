@@ -51,6 +51,8 @@ if ($rs && $rs->num_rows > 0) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+
 </head>
 <body>
 
@@ -68,6 +70,10 @@ if ($rs && $rs->num_rows > 0) {
 
     <section class="section dashboard">
       <div class="row">
+      <div class="text-center mb-3">
+                    <!-- <button class="btn btn-secondary" onclick="printPage()">Print</button> -->
+                    <button class="btn" onclick="saveToPDF()">Save as PDF <i class="ri-file-download-line"></i></button>
+                </div>
 
         <!-- Left side columns -->
         <div class="col-lg-12">
@@ -261,7 +267,110 @@ if ($rs && $rs->num_rows > 0) {
       </div>
     </section>
 
+    <!-- Part C: Rejected Subjects -->
+    <section class="section dashboard">
+      <div class="row">
+
+        <!-- Left side columns -->
+        <div class="col-lg-12">
+          <div class="row">
+          <div class="card">
+            <div class="card-body">
+            <h5 class="card-title">PART C: REJECTED COURSES</h5>
+            <p style="text-align: center">SUBJECTS THAT WERE REJECTED THIS SEMESTER</p>
+            <!-- Bordered Table -->
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">NO</th>
+                      <th scope="col">CODE</th>
+                      <th scope="col">TITLE</th>
+                      <th scope="col">CREDIT</th>
+                      <th scope="col">GRADE</th>
+                      <th scope="col">SIMILAR COURSES</th>
+                      <th scope="col">COMMENT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $stud_id = $_SESSION['stud_id'] ?? ''; // Ensure session ID is set
+
+                    $query = "SELECT course_code, title, credit_hour, grade, similar, similar2, grade2, aa_comment 
+                              FROM reject_transfer 
+                              WHERE stud_id = '$stud_id'";
+
+                    $sg = $conn->query($query);
+                    $no = 0;
+
+                    if ($sg && $sg->num_rows > 0) {
+                        while ($row = $sg->fetch_assoc()) {
+                            $no++;
+                            $isSimilar2Visible = $row['similar2'] !== 'N/A';
+                    ?>
+                    <tr>
+                      <th scope="row"><?php echo $no ?></th>
+                      <td><?php echo $row['course_code'] ?></td>
+                      <td><?php echo $row['title'] ?></td>
+                      <td><?php echo $row['credit_hour'] ?></td>
+                      <td><?php echo $row['grade'] ?></td>
+                      <td>
+                        <?php
+                        echo $row['similar'];
+                        echo '<br>';
+                        if ($isSimilar2Visible) {
+                            echo $row['similar2'];
+                        }
+                        ?>
+                      </td>
+                      <td><?php echo $row['aa_comment'] ?></td>
+                    </tr>
+                    <?php
+                        }
+                    } else {
+                        echo "<tr><td colspan='7' class='text-center'>No Rejected Subjects Found!</td></tr>";
+                    }
+                    ?>
+                  </tbody>
+                </table>
+                <!-- End Bordered Table -->                
+              </div>
+            </div><!-- End Default Card -->
+          </div>
+        </div><!-- End Left side columns -->
+
+      </div>
+    </section>
+  
+
   </main><!-- End #main -->
+
+<script>
+  function saveToPDF() {
+    html2canvas(document.querySelector("#main")).then(canvas => {
+        var imgData = canvas.toDataURL('image/png');
+        var pdf = new jsPDF('p', 'mm', 'a4');
+        var imgWidth = 210; // A4 width in mm
+        var imgHeight = canvas.height * imgWidth / canvas.width;
+        var heightLeft = imgHeight;
+
+        var position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 295;
+
+        while (heightLeft >= 0) {
+            position -= 295;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 295;
+        }
+
+        pdf.save('student_details.pdf');
+    });
+}
+
+</script>
+
   <?php
   include('footer.php');
   ?>
