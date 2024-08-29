@@ -49,10 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Retrieve data SQL
-$query = "SELECT s.stud_id, s.name, s.icno, s.faculty, p.prog_name, p.prog_code, s.session, s.email, s.phone, s.latest_int, i.int_name, s.username
+$query = "SELECT s.stud_id, s.name, s.icno, s.faculty, p.prog_name, p.prog_code, s.session, s.email, s.phone, s.latest_int, i.int_name, s.username, l.lect_id, l.lect_name
           FROM student s
           JOIN programme p ON s.prog_id = p.prog_id
           JOIN institution i ON s.int_id = i.int_id
+          JOIN lecturer l ON s.lect_id = l.lect_id
           WHERE stud_id = " . $_SESSION['stud_id'];
           $rs = $conn->query($query);
           $num = $rs->num_rows;
@@ -69,6 +70,7 @@ $query = "SELECT s.stud_id, s.name, s.icno, s.faculty, p.prog_name, p.prog_code,
           $latest_int = $rows['latest_int'];
           $username = $rows['username'];
           $int_name = $rows['int_name'];
+          $lect_name = $rows['lect_name'];
 
 
 
@@ -188,6 +190,11 @@ $query = "SELECT s.stud_id, s.name, s.icno, s.faculty, p.prog_name, p.prog_code,
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Previous Institution</div>
                     <div class="col-lg-9 col-md-8"><?php echo $int_name; ?></div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-3 col-md-4 label">Academic Advisor</div>
+                    <div class="col-lg-9 col-md-8"><?php echo $lect_name; ?></div>
                   </div>
 
                 </div>
