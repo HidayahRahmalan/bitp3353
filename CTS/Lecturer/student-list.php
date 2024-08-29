@@ -45,6 +45,7 @@ include('../include/connection.php');
                     <th>No.</th>
                     <th>Name</th>
                     <th>Matric No</th>
+                    <th>Previous Institution</th>
                     <th>Total Credit</th>
                     <th>Status</th>
                     <th>Transfer Date</th>
@@ -62,6 +63,8 @@ include('../include/connection.php');
                             s.username,
                             t.aa_status, 
                             t.transfer_date,
+                            i.int_id,
+                            i.int_name,
                             SUM(c.credit_hour) AS total
                         FROM 
                             transfer t
@@ -73,6 +76,8 @@ include('../include/connection.php');
                             lecturer r ON s.lect_id = r.lect_id
                         JOIN 
                             course c ON g.course_id = c.course_id
+                        JOIN 
+                            institution i ON s.int_id = i.int_id
                         WHERE 
                             r.lect_id = '$lect_id'
                         AND 
@@ -92,6 +97,7 @@ include('../include/connection.php');
                             <td><?php echo $sn ?></td>
                             <td><?php echo $row['name'] ?></td>
                             <td><?php echo $row['username'] ?></td>
+                            <td><?php echo $row['int_name'] ?></td>
                             <td><?php echo $row['total'];?></td>
                             <td><?php echo $row['aa_status'] ?></td>
                             <td><?php echo date('d/m/Y', strtotime($row['transfer_date'])); ?></td>
