@@ -51,6 +51,8 @@ if ($rs && $rs->num_rows > 0) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+
 </head>
 <body>
 
@@ -68,6 +70,10 @@ if ($rs && $rs->num_rows > 0) {
 
     <section class="section dashboard">
       <div class="row">
+      <div class="text-center mb-3">
+                    <!-- <button class="btn btn-secondary" onclick="printPage()">Print</button> -->
+                    <button class="btn" onclick="saveToPDF()">Save as PDF <i class="ri-file-download-line"></i></button>
+                </div>
 
         <!-- Left side columns -->
         <div class="col-lg-12">
@@ -259,6 +265,34 @@ if ($rs && $rs->num_rows > 0) {
     </section>
 
   </main><!-- End #main -->
+
+  <script>
+    function saveToPDF() {
+    html2canvas(document.querySelector("#main")).then(canvas => {
+        var imgData = canvas.toDataURL('image/png');
+        var pdf = new jsPDF('p', 'mm', 'a4');
+        var imgWidth = 210; // A4 width in mm
+        var imgHeight = canvas.height * imgWidth / canvas.width;
+        var heightLeft = imgHeight;
+
+        var position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 295;
+
+        while (heightLeft >= 0) {
+            position -= 295;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 295;
+        }
+
+        pdf.save('student_details.pdf');
+    });
+}
+
+  </script>
+
   <?php
   include('footer.php');
   ?>
