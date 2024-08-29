@@ -42,8 +42,7 @@ include('../include/connection.php');
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Name</th>
-                    <th>Matric No</th>
+                    <th>Student Details</th>
                     <th>Total Credit</th>
                     <th>Status</th>
                     <th>Transfer Date</th>
@@ -54,38 +53,50 @@ include('../include/connection.php');
             <?php
             // Fetching data from the database
             $query = "SELECT 
-    s.stud_id,
-    s.name,
-    s.username,
-    MAX(t.transfer_id) AS transfer_id,
-    t.aa_status, 
-    t.tda_status, 
-    t.dean_status,
-    MAX(t.transfer_date) AS transfer_date,
-    SUM(c.credit_hour) AS total
-FROM 
-    transfer t
-JOIN 
-    grade g ON t.grade_id = g.grade_id
-JOIN 
-    student s ON g.stud_id = s.stud_id
-JOIN 
-    lecturer r ON s.lect_id = r.lect_id
-JOIN 
-    course c ON g.course_id = c.course_id
-WHERE 
-    (t.aa_status = 'Accepted' OR t.aa_status = 'Pending')
-AND
-    (t.dean_status = 'Accepted' OR t.dean_status = 'Pending')
-AND
-    t.tda_status != 'Pending'
-GROUP BY 
-    s.stud_id, 
-    s.name, 
-    s.username, 
-    t.aa_status, 
-    t.tda_status, 
-    t.dean_status";
+                            s.stud_id,
+                            s.name,
+                            s.username,
+                            MAX(t.transfer_id) AS transfer_id,
+                            t.aa_status, 
+                            t.tda_status, 
+                            t.dean_status,
+                            i.int_id,
+                            i.int_name,
+                            p.prog_id,
+                            p.prog_code,
+                            l.lect_id,
+                            l.lect_name,
+                            MAX(t.transfer_date) AS transfer_date,
+                            SUM(c.credit_hour) AS total
+                        FROM 
+                            transfer t
+                        JOIN 
+                            grade g ON t.grade_id = g.grade_id
+                        JOIN 
+                            student s ON g.stud_id = s.stud_id
+                        JOIN 
+                            lecturer r ON s.lect_id = r.lect_id
+                        JOIN 
+                            course c ON g.course_id = c.course_id
+                        JOIN
+                            institution i ON s.int_id = i.int_id
+                        JOIN
+                            programme p ON s.prog_id = p.prog_id
+                        JOIN
+                            lecturer l ON s.lect_id = l.lect_id
+                        WHERE 
+                            (t.aa_status = 'Accepted' OR t.aa_status = 'Pending')
+                        AND
+                            (t.dean_status = 'Accepted' OR t.dean_status = 'Pending')
+                        AND
+                            t.tda_status != 'Pending'
+                        GROUP BY 
+                            s.stud_id, 
+                            s.name, 
+                            s.username, 
+                            t.aa_status, 
+                            t.tda_status, 
+                            t.dean_status";
 
 
             $rs = $conn->query($query);
@@ -98,8 +109,13 @@ GROUP BY
                   
                         <tr>
                             <td><?php echo $sn ?></td>
-                            <td><?php echo $row['name'] ?></td>
-                            <td><?php echo $row['username'] ?></td>
+                            <td>
+                                <b>Name:</b> <?php echo $row['name']; ?><br>
+                                <b>Matric No:</b> <?php echo $row['username']; ?><br>
+                                <b>Programme:</b> <?php echo $row['prog_code']; ?><br>
+                                <b>Academic Advisor:</b> <?php echo $row['lect_name']; ?><br>
+                                <b>Prev Institution:</b> <?php echo $row['int_name']; ?>
+                            </td>
                             <td><?php echo $row['total'];?></td>
                             <td style="color: <?php echo ($row['aa_status'] == 'Accepted' && $row['tda_status'] == 'Accepted' && $row['dean_status'] == 'Accepted') ? 'green' : 'blue'; ?>">
                                             <?php 
