@@ -70,13 +70,14 @@
 				
 		
 				<div class="mt-4">
-					<!--<div class="d-flex justify-content-center links">
-						Don't have an account? <a href="#"  class="ml-2" style="text-decoration:none">Sign Up</a>
-					</div> -->
+					<div class="d-flex justify-content-center links">
+						<a href="../img/Lorry Driver Manual.pdf" target="_blank" style="text-decoration:underline; color: white">View Manual here</a>
+					</div>
 					<div class="d-flex justify-content-center links">
 						<a href="../" style="text-decoration:none; color: white">Back to Admin Panel</a>
 					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
