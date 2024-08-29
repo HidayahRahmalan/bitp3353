@@ -197,6 +197,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <p>Subject to transfer and Subject to apply at UTeM.</p>
                             <p>
                             <b>NOTE:</b> The courses listed here are exclusively for diploma courses with grades of A, A-, B+, B, B-, C+, and C. The maximum number of transfer credits allowed is limited to 36 credit hours.
+                            <a href="index.php" style="color: Blue; text-decoration: none;">
+                                View Credit Course Transfer
+                            </a>
                             </p>
                             <p style="color: darkblue;">Total Credit Hours Selected: <b><span id="total-credit" >0</span></b></p>
                             <?php
