@@ -31,18 +31,18 @@ include('../include/connection.php');
 
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Bordered Table</h5>
-                    <p>Add <code>.table-bordered</code> for borders on all sides of the table and cells.</p>
+                    <h5 class="card-title">View Diploma Course Grade</h5>
+                    
+                    <p>This section displays the grades for diploma courses that have been filled out by the student.</p>
+
                     <!-- Bordered Table -->
                     <table class="table table-bordered">
                         <thead>
                         <tr>
                             <th scope="col">No</th>
-                            <th scope="col">Course Code</th>
-                            <th scope="col">Course Name</th>
-                            <th scope="col">Credit Hour</th>
+                            <th scope="col">Bachelor Course</th>
+                            <th scope="col">Diploma Course</th>
                             <th scope="col">Grade</th>
-                            <th scope="col">Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -50,43 +50,50 @@ include('../include/connection.php');
                         <?php
                         $stud_id = $_SESSION['stud_id'];
 
-                        $query = "SELECT DISTINCT g.grade_id, d.course_code, d.title, d.credit_hour, g.grade
+                        $query = " SELECT DISTINCT g.grade_id, d.course_code, d.title, g.similar, g.grade, g.similar2, g.grade2
                                     FROM grade g
                                     JOIN course d ON g.course_id = d.course_id
-                                    WHERE g.stud_id = '$stud_id'";
-
+                                    WHERE g.stud_id = '$stud_id'
+                                    AND g.similar != 'N/A'
+                                    AND g.grade != 'N/A'";
+ 
                         $sg = $conn->query($query);
                         $no = 0;
 
                         if ($sg && $sg->num_rows > 0) {
                             while ($row = $sg->fetch_assoc()) {
                                 $no++;
-                                echo "
+                                $isSimilar2Visible = $row['similar2'] !== 'N/A';
+                                $isGrade2Visible = $row['grade2'] !== 'N/A';
+                    ?>
                                 <tr>
-                                <td>".$no."</td>
-                                <td>".$row['course_code']."</td>
-                                <td>".$row['title']."</td>
-                                <td>".$row['credit_hour']."</td>
+                                <td><?php echo $no; ?></td>
+                                <td><?php echo $row['course_code'] .' '. $row['title']; ?></td>
                                 <td>
-                                    <select class='form-select' onchange='updateGrade(this.value, ".$row['grade_id'].")'>
-                                        <option value='A' ".($row['grade'] == 'A' ? 'selected' : '').">A</option>
-                                        <option value='A-' ".($row['grade'] == 'A-' ? 'selected' : '').">A-</option>
-                                        <option value='B+' ".($row['grade'] == 'B+' ? 'selected' : '').">B+</option>
-                                        <option value='B' ".($row['grade'] == 'B' ? 'selected' : '').">B</option>
-                                        <option value='B-' ".($row['grade'] == 'B-' ? 'selected' : '').">B-</option>
-                                        <option value='C+' ".($row['grade'] == 'C+' ? 'selected' : '').">C+</option>
-                                        <option value='C' ".($row['grade'] == 'C' ? 'selected' : '').">C</option>
-                                        <option value='C-' ".($row['grade'] == 'C-' ? 'selected' : '').">C-</option>
-                                        <option value='D' ".($row['grade'] == 'D' ? 'selected' : '').">D</option>
-                                    </select>
+                                <?php 
+                                    // Display similar and grade  
+                                    echo $row['similar']; 
+                                    echo '<br>';
+                                    // Display similar2 and grade2 only if similar2 is not 'N/A'
+                                    if ($isSimilar2Visible) {
+                                        echo ' ' . $row['similar2'];
+                                    }
+                                    ?>
                                 </td>
                                 <td>
-                                    <form method='post' action=''>
-                                        <input type='hidden' name='grade_id' value='".$row['grade_id']."'>
-                                        <button type='submit' class='btn btn-sm btn-outline-secondary'>Save</button>
-                                    </form>
+                                    <?php 
+                                    // Display similar and grade
+                                    echo $row['grade']; 
+                                    echo '<br>';
+                                    // Display similar2 and grade2 only if similar2 is not 'N/A'
+                                    if ($isSimilar2Visible) {
+                                        echo ' ' . $row['grade2'];
+                                    }
+                                    ?>
+
                                 </td>
-                                </tr>";
+                                </tr>
+                        <?php
                             }
                         } else {
                             echo "<tr><td colspan='6' class='text-center'>No Record Found!</td></tr>";
@@ -96,6 +103,8 @@ include('../include/connection.php');
                         </tbody>
                     </table>
                     <!-- End Bordered Table -->
+                    <a href="transfer.php" class="btn btn-primary mt-3">Proceed to Credit Transfer</a>
+
                 </div>
             </div>
         </div>
@@ -103,23 +112,6 @@ include('../include/connection.php');
 </main>
 
 <?php include('footer.php'); ?>
-
-<script>
-    function updateGrade(grade, gradeId) {
-        // Send AJAX request to update the grade
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "view-grade.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                // Response received, handle accordingly
-                console.log(xhr.responseText); // For debugging
-            }
-        };
-        var data = "grade=" + grade + "&grade_id=" + gradeId;
-        xhr.send(data);
-    }
-</script>
 
 </body>
 </html>
