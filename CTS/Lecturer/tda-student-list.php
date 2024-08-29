@@ -43,8 +43,7 @@ include('../include/connection.php');
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Name</th>
-                    <th>Matric No</th>
+                    <th>Student Details</th>
                     <th>Total Credit</th>
                     <th>AA Status</th>
                     <th>TDA Status</th>
@@ -62,6 +61,12 @@ include('../include/connection.php');
                             MAX(t.transfer_id) AS transfer_id,
                             t.aa_status, 
                             t.tda_status,
+                            i.int_id,
+                            i.int_name,
+                            p.prog_id,
+                            p.prog_code,
+                            l.lect_id,
+                            l.lect_name,
                             MAX(t.transfer_date) AS transfer_date,
                             SUM(c.credit_hour) AS total
                         FROM 
@@ -72,6 +77,12 @@ include('../include/connection.php');
                             student s ON g.stud_id = s.stud_id
                         JOIN 
                             course c ON g.course_id = c.course_id
+                        JOIN
+                            institution i ON s.int_id = i.int_id
+                        JOIN
+                            programme p ON s.prog_id = p.prog_id
+                        JOIN
+                            lecturer l ON s.lect_id = l.lect_id
                         WHERE 
                             t.aa_status = 'Accepted'
                         AND 
@@ -90,8 +101,13 @@ include('../include/connection.php');
                   
                         <tr>
                             <td><?php echo $sn ?></td>
-                            <td><?php echo $row['name'] ?></td>
-                            <td><?php echo $row['username'] ?></td>
+                            <td>
+                                <b>Name:</b> <?php echo $row['name']; ?><br>
+                                <b>Matric No:</b> <?php echo $row['username']; ?><br>
+                                <b>Programme:</b> <?php echo $row['prog_code']; ?><br>
+                                <b>Academic Advisor:</b> <?php echo $row['lect_name']; ?><br>
+                                <b>Prev Institution:</b> <?php echo $row['int_name']; ?>
+                            </td>
                             <td><?php echo $row['total'];?></td>
                             <td><?php echo $row['aa_status'] ?></td>
                             <td><?php echo $row['tda_status'] ?></td>
