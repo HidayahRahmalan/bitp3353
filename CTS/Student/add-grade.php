@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 include('header.php');
-//session_start();
+
 include('../include/connection.php');
 
 $success = false;
@@ -62,6 +62,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Add Diploma Course Grade</title>
+    <style>
+        /* Include the CSS styles here */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #searchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        #searchInput:focus + .search-icon {
+            color: #007bff;
+        }
+    </style>
 </head>
 
 <body>
@@ -92,8 +131,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                             <b>NOTE:</b> Diploma Course 2 should only be applied to courses that need to be combined to achieve a total of 3 credit hours.
                         </p>
                         <p>
-                            <b style="color: red;">IMPORTANT:</b> Please ensure that all courses and grades match the degree course, as students will not be able to make edits after submission.
+                            <b style="color: red;">IMPORTANT:</b> Please ensure that all courses and grades match the degree course, as students will <b style="color: red;">NOT</b> be able to make edits after submission.
+                            <a href="view-grade.php" style="color: Blue; text-decoration: none;">
+                                <b>View Diploma Grades</b>
+                            </a>
                         </p>
+                       
+
                         <?php
                         if ($success) {
                             echo '<div class="alert alert-success">Grades added successfully!</div>';
@@ -107,8 +151,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                             echo '</div>';
                         }
                         ?>
+
+                        <!-- Search bar -->
+                        <div class="search-container">
+                            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search by course code or title..">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+
                         <form id="gradeForm" method="POST" action="">
-                            <table class="table table-bordered">
+                            <table class="table table-bordered" id="gradesTable">
                                 <input type="hidden" class="form-control" name="stud_id" value="<?php echo htmlspecialchars($_SESSION['stud_id']); ?>">
                                 <input type="hidden" name="submitted" value="<?php echo htmlspecialchars($submitted); ?>">
                                 <thead>
@@ -119,7 +170,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                                         <th scope="col">Credit Hour</th>
                                         <th scope="col">Diploma Course 1</th>
                                         <th scope="col">Grade</th>
-                                        <th scope="col">Diploma Course 2</th>
+                                        <th scope="col">
+                                            Diploma Course 2
+                                            <br>
+                                            <small style="color: red;">(Only for 2 combination subjects)</small>
+                                        </th>
                                         <th scope="col">Grade</th>
                                     </tr>
                                 </thead>
@@ -133,7 +188,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                                             LEFT JOIN grade g ON c.course_id = g.course_id AND g.stud_id = '$stud_id'
                                             LEFT JOIN institution i ON c.int_id = i.int_id
                                             WHERE c.type = 'Bachelor' 
-                                            ORDER BY c.course_id ASC
+                                            ORDER BY c.title ASC
                                             LIMIT 0, 25";
 
                                 $sg = $conn->query($query);
@@ -167,7 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                                                                             c.type = 'Diploma' 
                                                                             AND s.stud_id = '$stud_id'
                                                                         ORDER BY 
-                                                                            i.int_name ASC;");
+                                                                            c.title ASC;");
                                                     while ($p = $idx->fetch_assoc()) {
                                                         $courseInfo = htmlspecialchars($p['course_code'] . ' ' . $p['title']);
                                                         ?>
@@ -211,7 +266,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
                                                                             c.type = 'Diploma' 
                                                                             AND s.stud_id = '$stud_id'
                                                                         ORDER BY 
-                                                                            i.int_name ASC;");
+                                                                            c.title ASC;");
                                                     while ($p2 = $idx2->fetch_assoc()) {
                                                         $courseInfo2 = htmlspecialchars($p2['course_code'] . ' ' . $p2['title']);
                                                         ?>
@@ -258,17 +313,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $submitted != 'submitted') {
 <?php include('footer.php'); ?>
 
 <script>
-    document.getElementById('submitBtn').addEventListener('click', function() {
-        var confirmation = confirm('Are you sure you want to submit the grades? You will not be able to make any changes after submission.');
-        if (confirmation) {
-            document.getElementById('gradeForm').submit();
-        }
-    });
+                            document.getElementById('submitBtn').addEventListener('click', function() {
+                                var confirmation = confirm('Are you sure you want to submit the grades? You will not be able to make any changes after submission.');
+                                if (confirmation) {
+                                    document.getElementById('gradeForm').submit();
+                                }
+                            });
 
-    function updateSelectedSubject(select) {
-        var selectedSubject = select.options[select.selectedIndex].text;
-        document.getElementById('selectedSubject').value = selectedSubject;
-    }
+                            function updateSelectedSubject(select) {
+                                var selectedSubject = select.options[select.selectedIndex].text;
+                                document.getElementById('selectedSubject').value = selectedSubject;
+                            }
+
+                            function searchTable() {
+                            var input, filter, table, tr, tdCourseCode, tdCourseTitle, i, txtValueCourseCode, txtValueCourseTitle;
+                            input = document.getElementById("searchInput");
+                            filter = input.value.toUpperCase();
+                            table = document.getElementById("gradesTable");
+                            tr = table.getElementsByTagName("tr");
+
+                            for (i = 1; i < tr.length; i++) {
+                                // Get the course code and course title cells
+                                tdCourseCode = tr[i].getElementsByTagName("td")[0];
+                                tdCourseTitle = tr[i].getElementsByTagName("td")[1];
+
+                                if (tdCourseCode || tdCourseTitle) {
+                                    txtValueCourseCode = tdCourseCode.textContent || tdCourseCode.innerText;
+                                    txtValueCourseTitle = tdCourseTitle.textContent || tdCourseTitle.innerText;
+
+                                    // Check if either the course code or course title matches the filter
+                                    if (txtValueCourseCode.toUpperCase().indexOf(filter) > -1 || txtValueCourseTitle.toUpperCase().indexOf(filter) > -1) {
+                                        tr[i].style.display = ""; // Show the row if a match is found
+                                    } else {
+                                        tr[i].style.display = "none"; // Hide the row if no match is found
+                                    }
+                                }
+                            }
+                        }
 </script>
 </body>
 </html>
