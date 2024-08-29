@@ -43,8 +43,7 @@ include('../include/connection.php');
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Name</th>
-                    <th>Matric No</th>
+                    <th>Student Details</th>
                     <th>Total Credit</th>
                     <th>AA Status</th>
                     <th>TDA Status</th>
@@ -69,8 +68,13 @@ include('../include/connection.php');
                   
                         <tr>
                             <td><?php echo $sn ?></td>
-                            <td><?php echo $row['name'] ?></td>
-                            <td><?php echo $row['username'] ?></td>
+                            <td>
+                                <b>Name:</b> <?php echo $row['name']; ?><br>
+                                <b>Matric No:</b> <?php echo $row['username']; ?><br>
+                                <b>Programme:</b> <?php echo $row['prog_code']; ?><br>
+                                <b>Academic Advisor:</b> <?php echo $row['lect_name']; ?><br>
+                                <b>Prev Institution:</b> <?php echo $row['int_name']; ?>
+                            </td>
                             <td><?php echo $row['total'];?></td>
                             <td><?php echo $row['aa_status'] ?></td>
                             <td><?php echo $row['tda_status'] ?></td>
