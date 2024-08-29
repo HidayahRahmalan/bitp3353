@@ -64,117 +64,118 @@
                             <div class="row">
                                 <div class="col-lg-6">
                                     <form role="form" action="addedpickup.php" method="post">
-                                     
-                                   
-
                                         <div class="form-group">
-                                        <label for="filterBrand" class="mr-2">Event: </label>
-                                          <select name="event_id" class="form-control" required>
-                                            <option value="">--- Select Event---</option>
-                                            <?php
-                                            $today = date('Y-m-d');
-                                            $eventname = $conn->query("SELECT * FROM recycle_event WHERE event_date >= '$today'");
-        
-                                            while ($c = $eventname->fetch_assoc()) {
-                                                ?>
-                                                <option value="<?php echo $c['event_id'] ?>">
-                                                    <?php echo $c['event_name'] ?>
-                                                </option>
+                                            <label for="event_id" class="mr-2">Event: </label>
+                                            <select name="event_id" id="event_id" class="form-control" required>
+                                                <option value="">--- Select Event---</option>
                                                 <?php
-                                            }
-                                                   ?>
+                                                $today = date('Y-m-d');
+                                                $eventname = $conn->query("SELECT * FROM recycle_event WHERE event_date >= '$today'");
+                                                while ($c = $eventname->fetch_assoc()) {
+                                                    ?>
+                                                    <option value="<?php echo $c['event_id'] ?>">
+                                                        <?php echo $c['event_name'] ?>
+                                                    </option>
+                                                    <?php
+                                                }
+                                                ?>
                                             </select>
                                         </div>
 
                                         <div class="form-group">
-                                        <label for="filterBrand" class="mr-2">Select Pickup Lorry: </label>
-                                          <select name="lorry_id" class="form-control" required>
-                                            <option value="">--- Select Lorry---</option>
-                                            <?php
-        
-                                             $lorryname = $conn->query("SELECT * FROM pickup_lorry WHERE status = 'Available' ");
-                                               while ($l = $lorryname->fetch_assoc()) {
-                                                  $ev[$l['lorry_id']] = $l['plate_number'];
-                                                   ?>
-                                                  <option value="<?php echo $l['lorry_id'] ?>">
-                                                    <?php echo $l['plate_number'] ?>
-                                                      </option>
-                                                  <?php
-                                                 }
-                                                   ?>
+                                            <label for="totalDonations" class="mr-2">Total User Donations: </label>
+                                            <input type="text" id="totalDonations" class="form-control" name="total_donations" readonly>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lorry_id" class="mr-2">Select Pickup Lorry: </label>
+                                            <select name="lorry_id" id="lorry_id" class="form-control" required>
+                                                <option value="">--- Select Lorry---</option>
+                                                <?php
+                                                $lorryname = $conn->query("SELECT * FROM pickup_lorry WHERE status = 'Available'");
+                                                while ($l = $lorryname->fetch_assoc()) {
+                                                    ?>
+                                                    <option value="<?php echo $l['lorry_id'] ?>">
+                                                        <?php echo $l['plate_number'] ?>
+                                                    </option>
+                                                    <?php
+                                                }
+                                                ?>
                                             </select>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Pickup Status</label>
-                                            
-                                             <select class="form-control" name="pickup_status" required>
-                                               <option value="">--- Select Status---</option>
-                                               <option value="To Be Pickup">To Be Pickup</option>
-                                               <option value="Already Pickup">Already Pickup</option>
-                                             </select>
-                                            
+                                            <select class="form-control" name="pickup_status" required>
+                                                <option value="">--- Select Status---</option>
+                                                <option value="To Be Pickup">To Be Pickup</option>
+                                                <option value="Already Pickup">Already Pickup</option>
+                                            </select>
                                         </div>
-                                        
+
                                         <div class="form-group">
                                             <label>Pickup Date</label>
                                             <input class="form-control" type="date" name="pickup_date" min="<?php echo date('Y-m-d'); ?>" required>
                                         </div>
+
                                         <div class="form-group">
                                             <label>Pickup Time</label>
-                                            <input class="form-control" type="time"  name="pickup_time" min="07:00" max="23:59" required>
+                                            <input class="form-control" type="time" name="pickup_time" min="07:00" max="23:59" required>
                                         </div>
+
                                         <div class="form-group">
                                             <label>Drop-Off Destination</label>
-                                            
-                                             <select class="form-control" name="dropoff_destination" required>
-                                               <option value="">--- Select Dropoff---</option>
-                                               <option value="Pertubuhan Rumah Kebajikan Seri Cahaya Pulau Pinang">Pertubuhan Rumah Kebajikan Seri Cahaya Pulau Pinang (PNG)</option>
-                                               <option value="Pusat Jagaan Permata Kasih Alma">Pusat Jagaan Permata Kasih Alma (PNG)</option>
-                                               <option value="Rumah Anak-Anak Yatim Sultan Salahuddin Abdul Aziz Shah Al-Haj">Rumah Anak-Anak Yatim Sultan Salahuddin Abdul Aziz Shah Al-Haj (MLK)</option>
-                                               <option value="Pertubuhan Kebajikan Anak Anak Harapan">Pertubuhan Kebajikan Anak Anak Harapan (MLK)</option>
-                                             </select>
-                                            
+                                            <select class="form-control" name="dropoff_destination" required>
+                                                <option value="">--- Select Dropoff---</option>
+                                                <option value="Pertubuhan Rumah Kebajikan Seri Cahaya Pulau Pinang">Pertubuhan Rumah Kebajikan Seri Cahaya Pulau Pinang (PNG)</option>
+                                                <option value="Pusat Jagaan Permata Kasih Alma">Pusat Jagaan Permata Kasih Alma (PNG)</option>
+                                                <option value="Rumah Anak-Anak Yatim Sultan Salahuddin Abdul Aziz Shah Al-Haj">Rumah Anak-Anak Yatim Sultan Salahuddin Abdul Aziz Shah Al-Haj (MLK)</option>
+                                                <option value="Pertubuhan Kebajikan Anak Anak Harapan">Pertubuhan Kebajikan Anak Anak Harapan (MLK)</option>
+                                            </select>
                                         </div>
 
-                        										
                                         <button type="submit" class="btn btn-success btn-default" style="border-radius: 0%;">Submit Form</button>
-                
                                     </form>
                                 </div>
-                                
                             </div>
-                            <!-- /.row (nested) -->
                         </div>
-                        <!-- /.panel-body -->
                     </div>
-                    <!-- /.panel -->
                 </div>
-                <!-- /.col-lg-12 -->
             </div>
-            <!-- /.row -->
         </div>
-        <!-- /#page-wrapper -->
 
     </div>
-    <!-- /#wrapper -->
-    <script>
-    // JavaScript fallback for browsers not supporting HTML5 date input validation
-    var today = new Date().toISOString().split('T')[0];
-    document.getElementsByName("pickup_date")[0].setAttribute('min', today);
-</script>
 
-    <!-- jQuery -->
     <script src="../vendor/jquery/jquery.min.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
     <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
     <script src="../vendor/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
+
+    <script>
+    $(document).ready(function() {
+        $('#event_id').change(function() {
+            var eventId = $(this).val();
+            
+            if (eventId) {
+                $.ajax({
+                    url: 'fetch_total_donation.php',
+                    type: 'POST',
+                    data: { event_id: eventId },
+                    success: function(response) {
+                        $('#totalDonations').val(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('AJAX Error:', status, error);
+                    }
+                });
+            } else {
+                $('#totalDonations').val('');
+            }
+        });
+    });
+    </script>
+
+    
 
 </body>
 
