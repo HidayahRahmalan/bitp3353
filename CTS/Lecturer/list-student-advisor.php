@@ -1,18 +1,23 @@
 <?php
-error_reporting();
+error_reporting(E_ALL);
 include('header.php');
 include('../include/connection.php');
 
+// Handle the POST request to send a notification
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $stud_id = $_POST['stud_id'];
+    if (isset($_POST['stud_id'])) {
+        $stud_id = $_POST['stud_id'];
 
-    // Your notification logic here. For example, you could update a notification table in your database.
-    $query = "INSERT INTO notifications (stud_id, message, status) VALUES ('$stud_id', 'You have been poked by your advisor. Please do credit transfer now!', 'unread')";
+        // Your notification logic here. For example, you could update a notification table in your database.
+        $query = "INSERT INTO notifications (stud_id, message, status) 
+                  VALUES ('$stud_id', 'You have been poked by your advisor. Please do credit transfer now!', 'unread')";
 
-    if ($conn->query($query) === TRUE) {
-        echo "Notification sent successfully";
-    } else {
-        echo "Error: " . $query . "<br>" . $conn->error;
+        if ($conn->query($query) === TRUE) {
+            echo "Notification sent successfully";
+        } else {
+            echo "Error: " . $query . "<br>" . $conn->error;
+        }
+        exit; // Stop further processing after handling the AJAX request
     }
 }
 
@@ -151,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $('.poke-btn').click(function() {
             var studId = $(this).data('stud-id');
             $.ajax({
-                url: '',
+                url: '', // Current file or specify the URL to handle the request
                 type: 'POST',
                 data: { stud_id: studId },
                 success: function(response) {
