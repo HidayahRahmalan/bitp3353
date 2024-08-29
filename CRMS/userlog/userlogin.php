@@ -63,6 +63,9 @@
             ?>
 
             <div class="mt-4">
+            <div class="d-flex justify-content-center links">
+						<a href="forgot_password.php" class="ml-2" style="text-decoration:underline; color: white">Forgot Password?</a>
+					</div>
                 <div class="d-flex justify-content-center links">
                     Don't have an account? <a href="userregister.php" class="ml-2" style="text-decoration:none">Sign Up</a>
                 </div>
