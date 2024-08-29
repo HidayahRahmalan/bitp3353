@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <!-- Inside the form for courses' info -->
                     <tr>
                         <td colspan="7">
-                            <form method="post">
+                            <form method="post" >
                                 <textarea name="overall_comment" rows="2" cols="50" placeholder="Add overall comment"></textarea><br>
                                 <button type="submit" name="overall_action" value="accept" class="btn btn-success" onclick="return confirmAction('accept');">Accept</button>
                                 <button type="submit" name="overall_action" value="reject" class="btn btn-danger" onclick="return confirmAction('reject');">Reject</button>
