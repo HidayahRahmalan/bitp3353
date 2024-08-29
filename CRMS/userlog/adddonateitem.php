@@ -68,7 +68,7 @@
                                     <form role="form" action="addeddonate.php" method="post" >
                                         <div class="form-group">
                                             <label>Event Name</label>
-                                            <input class="form-control" type="text" name="event_name" value='<?php echo $row['event_name']; ?>' required>
+                                            <input class="form-control" type="text" name="event_name" value='<?php echo $row['event_name']; ?>' readonly required>
                                         </div>
                                         <div class="form-group">
                                             <label for="filterBrand" class="mr-2">Select Items To Donate: </label>
