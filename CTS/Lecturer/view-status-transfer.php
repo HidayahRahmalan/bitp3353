@@ -43,29 +43,46 @@ if ($rs && $rs->num_rows > 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Handle form submission to update course status
-    $course_code = $_POST['course_code'];
-    $comment = $_POST['comment']; // Changed from aa_comment to comment
-    $action = $_POST['action']; // 'accept' or 'reject'
+  // Handle form submission to update course status
+  $course_code = $_POST['course_code'];
+  $comment = $_POST['comment']; // Changed from aa_comment to comment
+  $action = $_POST['action']; // 'accept' or 'reject'
 
-    if ($action == 'accept') {
-        $aa_status = 'Accepted';
-        $update_query = "UPDATE transfer t
-                         JOIN grade g ON t.grade_id = g.grade_id
-                         JOIN course c ON g.course_id = c.course_id
-                         SET t.aa_status = '$aa_status', t.aa_comment = '$comment'
-                         WHERE c.course_code = '$course_code' AND g.stud_id = '$stud_id'";
-        $conn->query($update_query);
-    } elseif ($action == 'reject') {
-        $aa_status = 'Rejected';
-        $delete_query = "UPDATE transfer t
-                         JOIN grade g ON t.grade_id = g.grade_id
-                         JOIN course c ON g.course_id = c.course_id
-                         SET t.aa_status = '$aa_status', t.aa_comment = '$comment'
-                         WHERE c.course_code = '$course_code' AND g.stud_id = '$stud_id'";
-        $conn->query($delete_query);
-    }
+  if ($action == 'accept') {
+      $aa_status = 'Accepted';
+      $update_query = "UPDATE transfer t
+                       JOIN grade g ON t.grade_id = g.grade_id
+                       JOIN course c ON g.course_id = c.course_id
+                       SET t.aa_status = '$aa_status', t.aa_comment = '$comment'
+                       WHERE c.course_code = '$course_code' AND g.stud_id = '$stud_id'";
+      $conn->query($update_query);
+  } elseif ($action == 'reject') {
+      // Fetch course details before deletion
+      $fetch_course_query = "SELECT c.course_code, c.title, c.credit_hour, g.grade, g.similar, g.similar2, g.grade2 
+                             FROM course c
+                             JOIN grade g ON c.course_id = g.course_id
+                             WHERE c.course_code = '$course_code' AND g.stud_id = '$stud_id'";
+      $course_details = $conn->query($fetch_course_query)->fetch_assoc();
+
+      // Insert into reject table
+      $insert_reject_query = "INSERT INTO reject_transfer (stud_id, course_code, title, credit_hour, grade, similar, similar2, grade2, aa_comment)
+                              VALUES ('$stud_id', '{$course_details['course_code']}', '{$course_details['title']}', '{$course_details['credit_hour']}',
+                                      '{$course_details['grade']}', '{$course_details['similar']}', '{$course_details['similar2']}',
+                                      '{$course_details['grade2']}', '$comment')";
+      $conn->query($insert_reject_query);
+
+      // Delete or update the rejected course in the original table
+      $delete_query = "DELETE FROM transfer 
+                       WHERE grade_id IN (
+                           SELECT g.grade_id 
+                           FROM grade g 
+                           JOIN course c ON g.course_id = c.course_id 
+                           WHERE c.course_code = '$course_code' AND g.stud_id = '$stud_id'
+                       )";
+      $conn->query($delete_query);
+  }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -254,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       <td><?php echo $row['aa_status'] ?></td>
                       <td><?php echo $row['aa_comment'] ?></td>
                       <td>
-                        <form method="post">
+                        <form method="post" onsubmit="return confirmAction(this);">
                           <input type="hidden" name="course_code" value="<?php echo $row['course_code'] ?>">
                           <textarea name="comment" rows="2" cols="20" placeholder="Add comment"></textarea> <br>
                           <button type="submit" name="action" value="accept" class="btn btn-success">Accept</button>
@@ -268,9 +285,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         echo "<tr><td colspan='8' class='text-center'>No Record Found!</td></tr>";
                     }
                     ?>
+                    
                   </tbody>
+
+                  
                 </table>
-                <!-- End Bordered Table -->
+                <!-- End Bordered Table -->                 
               </div>
             </div><!-- End Default Card -->
           </div>
@@ -279,7 +299,92 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       </div>
     </section>
 
+    
+
+    <!-- Part C: Rejected Subjects -->
+    <section class="section dashboard">
+      <div class="row">
+
+        <!-- Left side columns -->
+        <div class="col-lg-12">
+          <div class="row">
+          <div class="card">
+            <div class="card-body">
+            <h5 class="card-title">PART C: REJECTED COURSES</h5>
+            <p style="text-align: center">SUBJECTS THAT WERE REJECTED THIS SEMESTER</p>
+            <!-- Bordered Table -->
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">NO</th>
+                      <th scope="col">CODE</th>
+                      <th scope="col">TITLE</th>
+                      <th scope="col">CREDIT</th>
+                      <th scope="col">GRADE</th>
+                      <th scope="col">SIMILAR COURSES</th>
+                      <th scope="col">COMMENT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $stud_id = $_SESSION['stud_id'] ?? ''; // Ensure session ID is set
+
+                    $query = "SELECT course_code, title, credit_hour, grade, similar, similar2, grade2, aa_comment 
+                              FROM reject_transfer 
+                              WHERE stud_id = '$stud_id'";
+
+                    $sg = $conn->query($query);
+                    $no = 0;
+
+                    if ($sg && $sg->num_rows > 0) {
+                        while ($row = $sg->fetch_assoc()) {
+                            $no++;
+                            $isSimilar2Visible = $row['similar2'] !== 'N/A';
+                    ?>
+                    <tr>
+                      <th scope="row"><?php echo $no ?></th>
+                      <td><?php echo $row['course_code'] ?></td>
+                      <td><?php echo $row['title'] ?></td>
+                      <td><?php echo $row['credit_hour'] ?></td>
+                      <td><?php echo $row['grade'] ?></td>
+                      <td>
+                        <?php
+                        echo $row['similar'];
+                        echo '<br>';
+                        if ($isSimilar2Visible) {
+                            echo $row['similar2'];
+                        }
+                        ?>
+                      </td>
+                      <td><?php echo $row['aa_comment'] ?></td>
+                    </tr>
+                    <?php
+                        }
+                    } else {
+                        echo "<tr><td colspan='7' class='text-center'>No Rejected Subjects Found!</td></tr>";
+                    }
+                    ?>
+                  </tbody>
+                </table>
+                <!-- End Bordered Table -->                
+              </div>
+            </div><!-- End Default Card -->
+          </div>
+        </div><!-- End Left side columns -->
+
+      </div>
+    </section> 
+  
   </main><!-- End #main -->
+
+  <script>
+function confirmAction(form) {
+    const action = form.querySelector('button[name="action"][type="submit"]:focus').value;
+    const message = action === 'accept' ? 'Are you sure you want to accept this request?' : 'Are you sure you want to reject this request?';
+    return confirm(message);
+}
+</script>
+
   <?php
   include('footer.php');
   ?>
