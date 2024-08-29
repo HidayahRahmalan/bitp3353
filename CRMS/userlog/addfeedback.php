@@ -1,14 +1,15 @@
 <?php 
 include "session.php";
-include '../dbcon.php';
+include 'dbcon.php';
 if (isset($_POST['submit'])) {
+    $event_id           = $_POST['event_id'];
     $description        = $_POST['description'];
     $feedback_date      = $_POST['feedback_date'];
     $feedback_time      = $_POST['feedback_time'];
     $rating_score       = $_POST['rating_score'];
     $user_id            = $_SESSION['user_id'];
     
-    $sql = "INSERT INTO `feedback` ( description, feedback_date, feedback_time, rating_score, user_id) VALUES ('$description', '$feedback_date','$feedback_time', '$rating_score', '$user_id')";
+    $sql = "INSERT INTO `feedback` ( description, feedback_date, feedback_time, rating_score, user_id, event_id) VALUES ('$description', '$feedback_date','$feedback_time', '$rating_score', '$user_id', '$event_id')";
 
     $result = mysqli_query($con, $sql);
 
@@ -83,28 +84,42 @@ $todayDate = date("Y-m-d");
                             <div class="row">
                                 <div class="col-lg-6">
                                     <form role="form" action="" method="post">
-                                        <div class="form-group">
-                                            <label for="filterBrand" class="mr-2"> Description: </label>
-                                            <input class="form-control" type="text"  name="description" required>
-                                        </div>
 
-                                        <div class="form-group">
-                                            <label for="filterBrand" class="mr-2"> Feedback Date: </label>
-                                            <input type="date" class="form-control" name="feedback_date" value="<?php echo $todayDate; ?>" required>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="event_id" class="mr-2">Event: </label>
+                                        <select name="event_id" id="event_id" class="form-control" required>
+                                            <option value="">--- Select Event---</option>
+                                            <?php
+                                            $today = date('Y-m-d');
+                                            $eventname = $con->query("SELECT * FROM recycle_event WHERE event_date <= '$today'"); // Select events that already happened
+                                            while ($c = $eventname->fetch_assoc()) {
+                                                ?>
+                                                <option value="<?php echo $c['event_id'] ?>">
+                                                    <?php echo $c['event_name'] ?>
+                                                </option>
+                                                <?php
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
 
-                                        <div class="form-group">
-                                            <label for="filterBrand" class="mr-2"> Feedback Time: </label>
-                                            <input type="time" class="form-control" name="feedback_time" id="feedback_time" required>
-                                        </div>
+                                    <div class="form-group">
+                                        <label for="filterBrand" class="mr-2"> Description: </label>
+                                        <input class="form-control" type="text"  name="description" required>
+                                    </div>
 
-                                        <div class="form-group">
-                                            <label for="filterBrand" class="mr-2"> Rating: </label>
-                                            <div id="rating"></div>
-                                            <input type="hidden" name="rating_score" id="rating_score" required>
-                                        </div>
+                                    <!-- Hidden Feedback Date and Time -->
+                                    <input type="hidden" name="feedback_date" value="<?php echo $todayDate; ?>">
+                                    <input type="hidden" name="feedback_time" id="feedback_time" value="">
 
-                                        <button type="submit" name="submit" class="btn btn-success btn-default" style="border-radius: 0%;">Submit Form</button>
+                                    <div class="form-group">
+                                        <label for="filterBrand" class="mr-2"> Rating: </label>
+                                        <div id="rating"></div>
+                                        <input type="hidden" name="rating_score" id="rating_score" required>
+                                    </div>
+
+                                    <button type="submit" name="submit" class="btn btn-success btn-default" style="border-radius: 0%;">Submit Form</button>
+
                                     </form>
                                 </div>
                             </div>
@@ -125,16 +140,17 @@ $todayDate = date("Y-m-d");
         });
     });
 
-    // Function to format the current time as HH:MM
-    function getCurrentTime() {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-    }
+   // Function to format the current time as HH:MM
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
 
-    // Set the value of feedback_time to the current time
-    document.getElementById('feedback_time').value = getCurrentTime();
+        // Set the value of feedback_time to the current time
+        document.getElementById('feedback_time').value = getCurrentTime();
+
     </script>
     <!-- Bootstrap Core JavaScript -->
     <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
