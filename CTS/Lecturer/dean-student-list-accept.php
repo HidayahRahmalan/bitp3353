@@ -42,8 +42,7 @@ include('../include/connection.php');
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Name</th>
-                    <th>Matric No</th>
+                    <th>Student Details</th>
                     <th>Total Credit</th>
                     <th>Status</th>
                     <th>Transfer Date</th>
@@ -53,7 +52,7 @@ include('../include/connection.php');
             <tbody>
             <?php
             // Fetching data from the database
-            $query = "SELECT * FROM student_transfer_dean_view";
+            $query = "SELECT * FROM student_finish_dean_view";
 
 
             $rs = $conn->query($query);
@@ -66,8 +65,13 @@ include('../include/connection.php');
                   
                         <tr>
                             <td><?php echo $sn ?></td>
-                            <td><?php echo $row['name'] ?></td>
-                            <td><?php echo $row['username'] ?></td>
+                            <td>
+                                <b>Name:</b> <?php echo $row['name']; ?><br>
+                                <b>Matric No:</b> <?php echo $row['username']; ?><br>
+                                <b>Programme:</b> <?php echo $row['prog_code']; ?><br>
+                                <b>Academic Advisor:</b> <?php echo $row['lect_name']; ?><br>
+                                <b>Prev Institution:</b> <?php echo $row['int_name']; ?>
+                            </td>
                             <td><?php echo $row['total'];?></td>
                             <td style="color: <?php echo ($row['aa_status'] == 'Accepted' && $row['tda_status'] == 'Accepted' && $row['dean_status'] == 'Accepted') ? 'green' : 'blue'; ?>">
                                             <?php 
