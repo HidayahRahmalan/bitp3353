@@ -120,6 +120,7 @@ if (isset($_POST['tp_id']) && isset($_POST['action'])) {
                     <th>Course</th>
                     <th>Credit Hour</th>
                     <th>Institution</th>
+                    <th>Requester</th>
                     <th>Status</th>
                     <th>View Link</th>
                     <th>Date Request</th>
@@ -129,10 +130,12 @@ if (isset($_POST['tp_id']) && isset($_POST['action'])) {
             <tbody>
             <?php
             // Fetching data from the database
-            $query = "SELECT r.tp_id, r.code, r.title, r.credit_hour, r.status, r.tplink, r.date, i.int_name
+            $query = "SELECT r.tp_id, r.code, r.title, r.credit_hour, r.status, r.tplink, r.date, i.int_name, s.stud_id,s.name,l.lect_id, l.lect_name
                       FROM new_tp r
                       JOIN institution i ON r.int_id = i.int_id
-                      WHERE status = 'Pending'
+                      JOIN student s ON r.stud_id = s.stud_id
+                      JOIN lecturer l ON s.lect_id = l.lect_id
+                      WHERE r.status = 'Pending'
                       ORDER BY r.date DESC";
             $rs = $conn->query($query);
             $sn = 0;
@@ -148,14 +151,15 @@ if (isset($_POST['tp_id']) && isset($_POST['action'])) {
                             <td>".$row['code'].'-'.$row['title']."</td>
                             <td>".$row['credit_hour']."</td>
                             <td>".$row['int_name']."</td>
+                            <td>".$row['name'].'<br><i>('.$row['lect_name'].")</i></td>
                             <td>".$row['status']."</td>
                             <td><a href=\"".$pdfLink."\" target='_blank'>View</a></td> 
                             <td>".$formattedDate."</td>
                             <td>
-                                <form method='post'>
+                                <form method='post' onsubmit='return confirmAction(this);'>
                                     <input type='hidden' name='tp_id' value='".$row['tp_id']."'>
                                     <button type='submit' name='action' value='accept' class='btn btn-success' ".($row['status'] == 'Accepted' ? 'disabled' : '').">Accept and Upload</button>
-                                    <button type='submit' name='action' value='reject' class='btn btn-danger' ".($row['status'] == 'Rejected' ? 'disabled' : '').">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reject &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                    <button type='submit' name='action' value='reject' class='btn btn-danger' ".($row['status'] == 'Rejected' ? 'disabled' : '').">&nbsp;&nbsp;&nbsp;&nbsp; Reject &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
                                 </form>
                             </td>
                         </tr>";
@@ -189,9 +193,11 @@ if (isset($_POST['tp_id']) && isset($_POST['action'])) {
 $filterStatus = isset($_GET['status_filter']) ? $_GET['status_filter'] : '';
 
 // Fetch data based on the filter status
-$query = "SELECT r.tp_id, r.code, r.title, r.credit_hour, r.status, r.tplink, r.date, r.review_date, i.int_name
+$query = "SELECT r.tp_id, r.code, r.title, r.credit_hour, r.status, r.tplink, r.date, r.review_date, i.int_name, s.stud_id,s.name,l.lect_id,l.lect_name
           FROM new_tp r
           JOIN institution i ON r.int_id = i.int_id
+          JOIN student s ON r.stud_id = s.stud_id
+          JOIN lecturer l ON s.lect_id = l.lect_id
           WHERE r.status = '$filterStatus' OR '$filterStatus' = ''
           ORDER BY r.date";
 $rs = $conn->query($query);
@@ -231,6 +237,7 @@ $sn = 0;
                     <th>Course</th>
                     <th>Credit Hour</th>
                     <th>Institution</th>
+                    <th>Requester</th>
                     <th>Status</th>
                     <th>View Link</th>
                     <th>Request Date</th>
@@ -248,8 +255,12 @@ $sn = 0;
                 while ($row = $rs->fetch_assoc()) {
                     $sn++;
                     $pdfLink = "../teachingplan/" . $row['tplink'];
-                    $formattedDate = date('d/m/Y', strtotime($row['date']));
-                    $formattedRDate = date('d/m/Y', strtotime($row['review_date']));
+                    // Check if 'date' is not null before formatting
+                    $formattedDate = !is_null($row['date']) ? date('d/m/Y', strtotime($row['date'])) : '';
+                    
+                    // Check if 'review_date' is not null before formatting
+                    $formattedRDate = !is_null($row['review_date']) ? date('d/m/Y', strtotime($row['review_date'])) : '';
+                    
 
                     echo "
                         <tr>
@@ -257,6 +268,7 @@ $sn = 0;
                             <td>".$row['code'].'-'.$row['title']."</td>
                             <td>".$row['credit_hour']."</td>
                             <td>".$row['int_name']."</td>
+                            <td>".$row['name'].'<br><i>('.$row['lect_name'].")</i></td>
                             <td>".$row['status']."</td>
                             <td><a href=\"".$pdfLink."\" target='_blank'>View</a></td>
                             <td>".$formattedDate."</td>";
@@ -267,10 +279,10 @@ $sn = 0;
                     } elseif ($filterStatus == 'Rejected') {
                         echo "<td>".$formattedRDate."</td>
                               <td>
-                                <form method='post'>
+                                <form method='post' onsubmit='return confirmAction(this);'>
                                     <input type='hidden' name='tp_id' value='".$row['tp_id']."'>
                                     <button type='submit' name='action' value='accept' class='btn btn-success'>Accept and Upload</button>
-                                    <button type='submit' name='action' value='reject' class='btn btn-danger'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reject &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                    <button type='submit' name='action' value='reject' class='btn btn-danger'>&nbsp;&nbsp;&nbsp; Reject &nbsp;&nbsp;&nbsp;</button>
                                 </form>
                                 </form>
                               </td>";
@@ -295,6 +307,13 @@ $sn = 0;
 
 </section>
 </main><!-- End #main -->
+<script>
+function confirmAction(form) {
+    const action = form.querySelector('button[name="action"][type="submit"]:focus').value;
+    const message = action === 'accept' ? 'Are you sure you want to accept this request?' : 'Are you sure you want to reject this request?';
+    return confirm(message);
+}
+</script>
 </body>
 </html>
 
