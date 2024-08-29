@@ -52,6 +52,7 @@
                                     <table class="table table-striped table-bordered table-hover" id="donate-items-table">
                                         <thead>
                                             <tr>
+                                                
                                                 <th>Item Name</th>
                                                 <th>Event Name</th>
                                                 <th>Event Date</th>
@@ -61,12 +62,13 @@
                                                 <th>Pickup Status</th>
                                                 <th>Point Received</th>
                                                 <th>Item Dropoff</th>
+                                                <th>Remove</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php
                                             include "../dbcon.php";
-                                            $qry = "SELECT donate_item.item_id, donate_item.event_id, donate_item.item_point, recycle_event.event_name, recycle_event.event_loc, recycle_event.event_date, recycle_event.event_start_time, recycle_event.event_end_time, item_category.item_name, pickup_session.pickup_status,pickup_session.dropoff_destination 
+                                            $qry = "SELECT donate_item.donate_id,donate_item.item_id, donate_item.event_id, donate_item.item_point, recycle_event.event_name, recycle_event.event_loc, recycle_event.event_date, recycle_event.event_start_time, recycle_event.event_end_time, item_category.item_name, pickup_session.pickup_status,pickup_session.dropoff_destination 
                                                     FROM donate_item 
                                                     JOIN item_category ON donate_item.item_id = item_category.item_id
                                                     JOIN recycle_event ON donate_item.event_id = recycle_event.event_id 
@@ -76,15 +78,17 @@
                                             while ($row = mysqli_fetch_array($result)) {
                                                 $formatted_date = date('d-m-Y', strtotime($row['event_date']));
                                                 echo "<tr class='gradeA'>
+                                                
                                                 <td>" . $row['item_name'] . "</td>
                                                 <td>" . $row['event_name'] . "</td>
-                                                <td>" . $formatted_date. "</td>
+                                                <td>" . $formatted_date . "</td>
                                                 <td>" . $row['event_loc'] . "</td>
                                                 <td>" . $row['event_start_time'] . "</td>
                                                 <td>" . $row['event_end_time'] . "</td>
                                                 <td>" . $row['pickup_status'] . "</td>
                                                 <td>" . $row['item_point'] . "</td>
                                                 <td>" . $row['dropoff_destination'] . "</td>
+                                                <td><a href='delete_donateitem.php?donate_id=" . $row['donate_id'] . "' onclick='return confirmDelete();' class='btn btn-danger btn-sm'><i class='fa fa-trash'></i></a></td>
                                             </tr>";
                                             }
                                             ?>
@@ -176,8 +180,24 @@
                 $('#donate-history-table').DataTable({
                     responsive: true
                 });
+
+                // Select/Deselect all checkboxes
+                $('#select-all').click(function() {
+                    $('.select-item').prop('checked', this.checked);
+                });
+
+                $('.select-item').change(function() {
+                    if (!this.checked) {
+                        $('#select-all').prop('checked', false);
+                    }
+                });
             });
         </script>
+        <script>
+            function confirmDelete() {
+                return confirm("Are you sure you want to delete this donation?");
+            }
+            </script>
     </div>
 
     <footer>
