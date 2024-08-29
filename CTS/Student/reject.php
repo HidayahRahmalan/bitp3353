@@ -50,13 +50,13 @@ if(isset($_GET['delete'])){
                     <li class="breadcrumb-item active">Reject Course</li>
                 </ol>
             </nav>
-        </div><!-- End Page Title -->
+        </div><!-- End Page Title --> 
         <section class="section">
             <div class="row">
                 <div class="col-lg-12">   
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Rejected Course Status</h5>
+                            <h5 class="card-title">PART A: REJECTED COURSES TRANSFER</h5>
                             <p>When a course transfer request is <b style="color: red; ">'Rejected'</b>, it typically signifies that the course does not meet institution-specific requirements, prompting students to <b style="color: red; ">remove</b> the rejected course and seek alternatives with guidance from their academic advisors.
                                 <br><br>After remove the rejected courses, please make a new transfer <a href="transfer.php" style="color: blue; font-weight: bold ; text-decoration: underline;">Here</a></p>
                             <?php echo $statusMsg;?>
@@ -141,6 +141,81 @@ if(isset($_GET['delete'])){
                 </div>
             </div>
         </section>
+
+        <!-- Part C: Rejected Subjects -->
+    <section class="section dashboard">
+      <div class="row">
+
+        <!-- Left side columns -->
+        <div class="col-lg-12">
+          <div class="row">
+          <div class="card">
+            <div class="card-body">
+            <h5 class="card-title">PART B: REJECTED COURSES BY ACADEMIC ADVISOR</h5>
+            <p>List of courses rejected by the academic advisor for not meeting the required standards.</p>
+            <!-- Bordered Table -->
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">NO</th>
+                      <th scope="col">CODE</th>
+                      <th scope="col">TITLE</th>
+                      <th scope="col">CREDIT</th>
+                      <th scope="col">GRADE</th>
+                      <th scope="col">SIMILAR COURSES</th>
+                      <th scope="col">COMMENT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    $stud_id = $_SESSION['stud_id'] ?? ''; // Ensure session ID is set
+
+                    $query = "SELECT course_code, title, credit_hour, grade, similar, similar2, grade2, aa_comment 
+                              FROM reject_transfer 
+                              WHERE stud_id = '$stud_id'";
+
+                    $sg = $conn->query($query);
+                    $no = 0;
+
+                    if ($sg && $sg->num_rows > 0) {
+                        while ($row = $sg->fetch_assoc()) {
+                            $no++;
+                            $isSimilar2Visible = $row['similar2'] !== 'N/A';
+                    ?>
+                    <tr>
+                      <th scope="row"><?php echo $no ?></th>
+                      <td><?php echo $row['course_code'] ?></td>
+                      <td><?php echo $row['title'] ?></td>
+                      <td><?php echo $row['credit_hour'] ?></td>
+                      <td><?php echo $row['grade'] ?></td>
+                      <td>
+                        <?php
+                        echo $row['similar'];
+                        echo '<br>';
+                        if ($isSimilar2Visible) {
+                            echo $row['similar2'];
+                        }
+                        ?>
+                      </td>
+                      <td><?php echo $row['aa_comment'] ?></td>
+                    </tr>
+                    <?php
+                        }
+                    } else {
+                        echo "<tr><td colspan='7' class='text-center'>No Rejected Subjects Found!</td></tr>";
+                    }
+                    ?>
+                  </tbody>
+                </table>
+                <!-- End Bordered Table -->                
+              </div>
+            </div><!-- End Default Card -->
+          </div>
+        </div><!-- End Left side columns -->
+
+      </div>
+    </section>
+  
     </main><!-- End #main -->
     <?php include('footer.php'); ?>
 </body>
