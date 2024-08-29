@@ -91,7 +91,9 @@ if ($status_result && $status_result->num_rows > 0) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+
 </head>
 <body>
 
@@ -106,6 +108,8 @@ if ($status_result && $status_result->num_rows > 0) {
       </nav>
     </div><!-- End Page Title -->
 
+    
+
     <section class="section dashboard">
       <div class="row">
         <!-- Alert message -->
@@ -113,6 +117,10 @@ if ($status_result && $status_result->num_rows > 0) {
           <div class="alert alert-<?php echo $alert_type; ?> bg-<?php echo $alert_type; ?> text-light" role="alert">
             <?php echo $message; ?>
           </div>
+          <div class="text-center mb-3">
+                    <!-- <button class="btn btn-secondary" onclick="printPage()">Print</button> -->
+                    <button class="btn" onclick="saveToPDF()">Save as PDF <i class="ri-file-download-line"></i></button>
+                </div>
         </div>
 
         <!-- Left side columns -->
@@ -120,8 +128,12 @@ if ($status_result && $status_result->num_rows > 0) {
           <div class="row">
             <div class="card">
               <div class="card-body">
+                <!-- Print and Save Buttons -->
+               
+
                 <h1 class="card-title text-center">CREDIT EXEMPTION DETAILS</h1>
                 <h5 class="card-title">PART A: STUDENT'S INFO</h5>
+                
                 <!-- Multi Columns Form -->
                 <form class="row g-3">
                   <div class="col-md-12">
@@ -276,24 +288,6 @@ if ($status_result && $status_result->num_rows > 0) {
   </main><!-- End #main -->
 
   <script>
-// // Function to generate and download PDF
-// function saveToPDF() {
-//   // Capture the whole content to convert to PDF
-//   const element = document.getElementById('main');
-
-//   html2canvas(element).then(canvas => {
-//     const imgData = canvas.toDataURL('image/png');
-//     const pdf = new jsPDF('p', 'pt', 'a4');
-//     const imgProps= pdf.getImageProperties(imgData);
-//     const pdfWidth = pdf.internal.pageSize.getWidth();
-//     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    
-//     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    
-//     // Download the PDF file
-//     pdf.save('dashboard.pdf');
-//   });
-// }
 
 $(document).ready(function() {
         var notifications = <?php echo json_encode($notifications); ?>;
@@ -308,6 +302,36 @@ $(document).ready(function() {
             $('#notificationModal').modal('show');
         }
     });
+
+//     function printPage() {
+//     window.print();
+// }
+
+function saveToPDF() {
+    html2canvas(document.querySelector("#main")).then(canvas => {
+        var imgData = canvas.toDataURL('image/png');
+        var pdf = new jsPDF('p', 'mm', 'a4');
+        var imgWidth = 210; // A4 width in mm
+        var imgHeight = canvas.height * imgWidth / canvas.width;
+        var heightLeft = imgHeight;
+
+        var position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= 295;
+
+        while (heightLeft >= 0) {
+            position -= 295;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= 295;
+        }
+
+        pdf.save('student_details.pdf');
+    });
+}
+
+
 
 </script>
 
